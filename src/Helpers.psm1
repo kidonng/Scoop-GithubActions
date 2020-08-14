@@ -95,8 +95,8 @@ function Initialize-NeededSettings {
     #>
     @('buckets', 'cache') | ForEach-Object { New-Item (Join-Path $env:SCOOP $_) -Force -ItemType Directory | Out-Null }
 
-    $user = ($env:GITHUB_REPOSITORY -split '/')[0]
-    $email = if ($env:GITH_EMAIL) { $env:GITH_EMAIL } else { 'scoop-bucket-minion@users.noreply.github.com' }
+    $user = if ($env:USER_NAME) { $env:USER_NAME } else { 'github-actions[bot]' }
+    $email = if ($env:USER_EMAIL) { $env:USER_EMAIL } else { '41898282+github-actions[bot]@users.noreply.github.com' }
     $rem = "https://${env:GITHUB_ACTOR}:$env:GITHUB_TOKEN@github.com/$env:GITHUB_REPOSITORY.git"
 
     git config --global user.name $user
