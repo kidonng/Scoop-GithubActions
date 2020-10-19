@@ -7,6 +7,12 @@ function Test-Hash {
         [Int] $IssueID
     )
 
+   if ($env:GITHUB_BRANCH) {
+        $_BRANCH = $env:GITHUB_BRANCH
+    } else {
+        $_BRANCH = 'master'
+    }
+
     $gci, $man = Get-Manifest $Manifest
 
     $outputH = @(& (Join-Path $BINARIES_FOLDER 'checkhashes.ps1') -App $gci.Basename -Dir $MANIFESTS_LOCATION -Force *>&1)
@@ -39,7 +45,7 @@ function Test-Hash {
 
         $message = @('You are right. Thank you for reporting.')
         Add-Label -ID $IssueID -Label 'verified', 'hash-fix-needed'
-        $prs = (Invoke-GithubRequest "repos/$REPOSITORY/pulls?state=open&base=master&sorting=updated").Content | ConvertFrom-Json
+        $prs = (Invoke-GithubRequest "repos/$REPOSITORY/pulls?state=open&base=$_BRANCH&sorting=updated").Content | ConvertFrom-Json
         $prs = $prs | Where-Object { $_.title -eq "$Manifest@$($man.version): Hash fix" }
 
         # There is alreay PR for
@@ -72,7 +78,7 @@ function Test-Hash {
             # Create new PR
             Invoke-GithubRequest -Query "repos/$REPOSITORY/pulls" -Method Post -Body @{
                 'title' = "$Manifest@$($man.version): Hash fix"
-                'base'  = 'master'
+                'base'  = $_BRANCH
                 'head'  = $branch
                 'body'  = "- Closes #$IssueID"
             }
